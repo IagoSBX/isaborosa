@@ -1,0 +1,1 @@
+ALTER TABLE books ADD COLUMN genre VARCHAR(100) NULL AFTER page_count;
