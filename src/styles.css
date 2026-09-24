@@ -27,6 +27,8 @@
   --color-paper: var(--paper);
   --color-rose-wash: var(--rose-wash);
   --color-nude: var(--nude);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --radius-sm: calc(var(--radius) - 3px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 3px);
@@ -53,6 +55,8 @@
   --paper: oklch(0.987 0.007 67);
   --rose-wash: oklch(0.95 0.025 27);
   --nude: oklch(0.88 0.034 51);
+  --destructive: oklch(0.55 0.18 25);
+  --destructive-foreground: oklch(0.985 0.008 65);
 }
 
 * { box-sizing: border-box; }
@@ -234,4 +238,71 @@ h2 { font-family: var(--font-display); font-weight: 400; letter-spacing: 0; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
+}
+
+/* ---- Biblioteca da Baldinho: Modo Aconchego ----
+   Escopado a um wrapper (nao ao <html>), entao so afeta a area da biblioteca.
+   Nao e um dark mode generico: tons quentes de madeira/ambar a noite, nao cinza. */
+.cozy {
+  --background: oklch(0.24 0.028 45);
+  --foreground: oklch(0.93 0.018 70);
+  --card: oklch(0.29 0.032 42);
+  --card-foreground: oklch(0.93 0.018 70);
+  --primary: oklch(0.68 0.1 45);
+  --primary-foreground: oklch(0.18 0.02 40);
+  --secondary: oklch(0.34 0.03 42);
+  --secondary-foreground: oklch(0.88 0.02 65);
+  --muted: oklch(0.32 0.026 42);
+  --muted-foreground: oklch(0.72 0.02 60);
+  --accent: oklch(0.4 0.045 35);
+  --accent-foreground: oklch(0.9 0.02 60);
+  --border: oklch(0.38 0.03 42);
+  --input: oklch(0.36 0.028 42);
+  --ring: oklch(0.68 0.1 45);
+  --paper: oklch(0.26 0.03 43);
+  --rose-wash: oklch(0.33 0.035 32);
+  --nude: oklch(0.4 0.045 45);
+  transition: background-color .5s ease, color .5s ease;
+}
+
+.paper-grain {
+  position: relative;
+}
+.paper-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.paper-grain > * {
+  position: relative;
+  z-index: 1;
+}
+
+.estante-glow {
+  position: relative;
+}
+.estante-glow::before {
+  content: "";
+  position: absolute;
+  top: -4rem;
+  left: 50%;
+  z-index: 0;
+  width: 34rem;
+  height: 20rem;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, color-mix(in oklab, var(--primary) 18%, transparent), transparent 70%);
+  filter: blur(8px);
+}
+.estante-glow > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cozy { transition: none; }
 }

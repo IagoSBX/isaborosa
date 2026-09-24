@@ -3,8 +3,10 @@ package com.isaborosa.biblioteca.web;
 import com.isaborosa.biblioteca.dto.BookResponseDto;
 import com.isaborosa.biblioteca.dto.BookSearchResultDto;
 import com.isaborosa.biblioteca.dto.CreateBookRequest;
+import com.isaborosa.biblioteca.dto.FreeSourceDto;
 import com.isaborosa.biblioteca.dto.PriceDto;
 import com.isaborosa.biblioteca.service.BookService;
+import com.isaborosa.biblioteca.service.FreeSourceService;
 import com.isaborosa.biblioteca.service.PriceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,10 +29,12 @@ public class BookController {
 
     private final BookService bookService;
     private final PriceService priceService;
+    private final FreeSourceService freeSourceService;
 
-    public BookController(BookService bookService, PriceService priceService) {
+    public BookController(BookService bookService, PriceService priceService, FreeSourceService freeSourceService) {
         this.bookService = bookService;
         this.priceService = priceService;
+        this.freeSourceService = freeSourceService;
     }
 
     @GetMapping("/search")
@@ -76,5 +80,13 @@ public class BookController {
             description = "Consulta fontes externas em paralelo (hoje, Mercado Livre). Fonte que falha e omitida; nenhum preco e inventado.")
     public List<PriceDto> prices(@PathVariable Long id) {
         return priceService.getPrices(id);
+    }
+
+    @GetMapping("/{id}/free-sources")
+    @Operation(
+            summary = "Fontes legais e gratuitas para ler o livro",
+            description = "Consulta Project Gutenberg e Internet Archive. Nunca sugere pirataria; lista vazia quando nao ha fonte confirmada.")
+    public List<FreeSourceDto> freeSources(@PathVariable Long id) {
+        return freeSourceService.getFreeSources(id);
     }
 }

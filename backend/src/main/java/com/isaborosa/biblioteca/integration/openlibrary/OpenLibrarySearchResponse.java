@@ -16,6 +16,8 @@ public record OpenLibrarySearchResponse(List<Doc> docs) {
             List<String> publisher,
             Integer number_of_pages_median,
             List<String> subject,
-            String key) {
+            String key,
+            List<String> ia,
+            String ebook_access) {
     }
 }

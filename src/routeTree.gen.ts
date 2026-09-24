@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BibliotecaRouteImport } from './routes/biblioteca'
 import { Route as BibliotecaIndexRouteImport } from './routes/biblioteca/index'
 import { Route as BibliotecaEstatisticasRouteImport } from './routes/biblioteca/estatisticas'
+import { Route as BibliotecaLoginRouteImport } from './routes/biblioteca/login'
 import { Route as BibliotecaPesquisarRouteImport } from './routes/biblioteca/pesquisar'
+import { Route as BibliotecaTrocarSenhaRouteImport } from './routes/biblioteca/trocar-senha'
 import { Route as BibliotecaLivroIdRouteImport } from './routes/biblioteca/livro.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -36,9 +38,19 @@ const BibliotecaEstatisticasRoute = BibliotecaEstatisticasRouteImport.update({
   path: '/estatisticas',
   getParentRoute: () => BibliotecaRoute,
 } as any)
+const BibliotecaLoginRoute = BibliotecaLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => BibliotecaRoute,
+} as any)
 const BibliotecaPesquisarRoute = BibliotecaPesquisarRouteImport.update({
   id: '/pesquisar',
   path: '/pesquisar',
+  getParentRoute: () => BibliotecaRoute,
+} as any)
+const BibliotecaTrocarSenhaRoute = BibliotecaTrocarSenhaRouteImport.update({
+  id: '/trocar-senha',
+  path: '/trocar-senha',
   getParentRoute: () => BibliotecaRoute,
 } as any)
 const BibliotecaLivroIdRoute = BibliotecaLivroIdRouteImport.update({
@@ -51,14 +63,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/biblioteca': typeof BibliotecaRouteWithChildren
   '/biblioteca/estatisticas': typeof BibliotecaEstatisticasRoute
+  '/biblioteca/login': typeof BibliotecaLoginRoute
   '/biblioteca/pesquisar': typeof BibliotecaPesquisarRoute
+  '/biblioteca/trocar-senha': typeof BibliotecaTrocarSenhaRoute
   '/biblioteca/': typeof BibliotecaIndexRoute
   '/biblioteca/livro/$id': typeof BibliotecaLivroIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/biblioteca/estatisticas': typeof BibliotecaEstatisticasRoute
+  '/biblioteca/login': typeof BibliotecaLoginRoute
   '/biblioteca/pesquisar': typeof BibliotecaPesquisarRoute
+  '/biblioteca/trocar-senha': typeof BibliotecaTrocarSenhaRoute
   '/biblioteca': typeof BibliotecaIndexRoute
   '/biblioteca/livro/$id': typeof BibliotecaLivroIdRoute
 }
@@ -67,7 +83,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/biblioteca': typeof BibliotecaRouteWithChildren
   '/biblioteca/estatisticas': typeof BibliotecaEstatisticasRoute
+  '/biblioteca/login': typeof BibliotecaLoginRoute
   '/biblioteca/pesquisar': typeof BibliotecaPesquisarRoute
+  '/biblioteca/trocar-senha': typeof BibliotecaTrocarSenhaRoute
   '/biblioteca/': typeof BibliotecaIndexRoute
   '/biblioteca/livro/$id': typeof BibliotecaLivroIdRoute
 }
@@ -77,14 +95,18 @@ export interface FileRouteTypes {
     | '/'
     | '/biblioteca'
     | '/biblioteca/estatisticas'
+    | '/biblioteca/login'
     | '/biblioteca/pesquisar'
+    | '/biblioteca/trocar-senha'
     | '/biblioteca/'
     | '/biblioteca/livro/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/biblioteca/estatisticas'
+    | '/biblioteca/login'
     | '/biblioteca/pesquisar'
+    | '/biblioteca/trocar-senha'
     | '/biblioteca'
     | '/biblioteca/livro/$id'
   id:
@@ -92,7 +114,9 @@ export interface FileRouteTypes {
     | '/'
     | '/biblioteca'
     | '/biblioteca/estatisticas'
+    | '/biblioteca/login'
     | '/biblioteca/pesquisar'
+    | '/biblioteca/trocar-senha'
     | '/biblioteca/'
     | '/biblioteca/livro/$id'
   fileRoutesById: FileRoutesById
@@ -132,11 +156,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BibliotecaEstatisticasRouteImport
       parentRoute: typeof BibliotecaRoute
     }
+    '/biblioteca/login': {
+      id: '/biblioteca/login'
+      path: '/login'
+      fullPath: '/biblioteca/login'
+      preLoaderRoute: typeof BibliotecaLoginRouteImport
+      parentRoute: typeof BibliotecaRoute
+    }
     '/biblioteca/pesquisar': {
       id: '/biblioteca/pesquisar'
       path: '/pesquisar'
       fullPath: '/biblioteca/pesquisar'
       preLoaderRoute: typeof BibliotecaPesquisarRouteImport
+      parentRoute: typeof BibliotecaRoute
+    }
+    '/biblioteca/trocar-senha': {
+      id: '/biblioteca/trocar-senha'
+      path: '/trocar-senha'
+      fullPath: '/biblioteca/trocar-senha'
+      preLoaderRoute: typeof BibliotecaTrocarSenhaRouteImport
       parentRoute: typeof BibliotecaRoute
     }
     '/biblioteca/livro/$id': {
@@ -151,14 +189,18 @@ declare module '@tanstack/react-router' {
 
 interface BibliotecaRouteChildren {
   BibliotecaEstatisticasRoute: typeof BibliotecaEstatisticasRoute
+  BibliotecaLoginRoute: typeof BibliotecaLoginRoute
   BibliotecaPesquisarRoute: typeof BibliotecaPesquisarRoute
+  BibliotecaTrocarSenhaRoute: typeof BibliotecaTrocarSenhaRoute
   BibliotecaIndexRoute: typeof BibliotecaIndexRoute
   BibliotecaLivroIdRoute: typeof BibliotecaLivroIdRoute
 }
 
 const BibliotecaRouteChildren: BibliotecaRouteChildren = {
   BibliotecaEstatisticasRoute: BibliotecaEstatisticasRoute,
+  BibliotecaLoginRoute: BibliotecaLoginRoute,
   BibliotecaPesquisarRoute: BibliotecaPesquisarRoute,
+  BibliotecaTrocarSenhaRoute: BibliotecaTrocarSenhaRoute,
   BibliotecaIndexRoute: BibliotecaIndexRoute,
   BibliotecaLivroIdRoute: BibliotecaLivroIdRoute,
 }

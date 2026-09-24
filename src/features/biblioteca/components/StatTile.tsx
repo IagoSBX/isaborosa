@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 interface StatTileProps {
   label: string;
   value: string;
@@ -15,7 +17,14 @@ export function StatTile({ label, value, hint, icon: Icon, accentClassName = "bg
         <Icon size={16} />
       </div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-0.5 font-display text-2xl text-foreground sm:text-3xl">{value}</p>
+      <p
+        className={cn(
+          "mt-0.5 font-display text-foreground",
+          value.length > 10 ? "text-lg leading-tight sm:text-xl" : "text-2xl sm:text-3xl",
+        )}
+      >
+        {value}
+      </p>
       {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );

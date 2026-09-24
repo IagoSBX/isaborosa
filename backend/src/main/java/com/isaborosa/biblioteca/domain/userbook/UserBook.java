@@ -40,6 +40,9 @@ public class UserBook {
     @Column(columnDefinition = "TINYINT")
     private Integer rating;
 
+    @Column(name = "current_page")
+    private Integer currentPage;
+
     @Column(nullable = false)
     private boolean favorite;
 
@@ -78,6 +81,10 @@ public class UserBook {
         this.favorite = favorite;
     }
 
+    public void updateCurrentPage(Integer currentPage) {
+        this.currentPage = currentPage;
+    }
+
     public Long getId() {
         return id;
     }
@@ -96,6 +103,10 @@ public class UserBook {
 
     public Integer getRating() {
         return rating;
+    }
+
+    public Integer getCurrentPage() {
+        return currentPage;
     }
 
     public boolean isFavorite() {

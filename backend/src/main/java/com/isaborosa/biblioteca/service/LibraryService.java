@@ -13,6 +13,7 @@ import com.isaborosa.biblioteca.dto.UpdateLibraryRequest;
 import com.isaborosa.biblioteca.dto.UserBookResponseDto;
 import com.isaborosa.biblioteca.exception.BookNotFoundException;
 import com.isaborosa.biblioteca.exception.DuplicateBookInLibraryException;
+import com.isaborosa.biblioteca.exception.InvalidCurrentPageException;
 import com.isaborosa.biblioteca.exception.RatingRequiredException;
 import com.isaborosa.biblioteca.exception.UserBookNotFoundException;
 import java.util.List;
@@ -75,6 +76,11 @@ public class LibraryService {
             throw new RatingRequiredException();
         }
 
+        Integer pageCount = userBook.getBook().getPageCount();
+        if (request.currentPage() != null && pageCount != null && request.currentPage() > pageCount) {
+            throw new InvalidCurrentPageException(request.currentPage(), pageCount);
+        }
+
         if (request.status() != null) {
             userBook.updateStatus(request.status());
         }
@@ -83,6 +89,9 @@ public class LibraryService {
         }
         if (request.favorite() != null) {
             userBook.updateFavorite(request.favorite());
+        }
+        if (request.currentPage() != null) {
+            userBook.updateCurrentPage(request.currentPage());
         }
         return toDto(userBook);
     }
@@ -120,6 +129,7 @@ public class LibraryService {
                 userBook.getStatus(),
                 userBook.getRating(),
                 userBook.isFavorite(),
+                userBook.getCurrentPage(),
                 userBook.getCreatedAt(),
                 userBook.getUpdatedAt());
     }

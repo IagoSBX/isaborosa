@@ -9,6 +9,7 @@ public record UserBookResponseDto(
         ReadingStatus status,
         Integer rating,
         boolean favorite,
+        Integer currentPage,
         Instant createdAt,
         Instant updatedAt) {
 }

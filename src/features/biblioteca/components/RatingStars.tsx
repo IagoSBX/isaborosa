@@ -8,9 +8,11 @@ interface RatingStarsProps {
   onChange?: (rating: number) => void;
   readOnly?: boolean;
   size?: number;
+  /** "outline" (padrão) deixa estrelas vazias apenas contornadas; "muted" preenche com um tom claro. */
+  emptyVariant?: "outline" | "muted";
 }
 
-export function RatingStars({ value, onChange, readOnly = false, size }: RatingStarsProps) {
+export function RatingStars({ value, onChange, readOnly = false, size, emptyVariant = "outline" }: RatingStarsProps) {
   const stars = [1, 2, 3, 4, 5];
   const [hovered, setHovered] = useState<number | null>(null);
 
@@ -22,7 +24,7 @@ export function RatingStars({ value, onChange, readOnly = false, size }: RatingS
             key={star}
             size={size ?? 16}
             className={cn(
-              "fill-none stroke-muted-foreground",
+              emptyVariant === "muted" ? "fill-muted stroke-muted" : "fill-none stroke-muted-foreground",
               value != null && star <= value && "fill-primary stroke-primary",
             )}
           />

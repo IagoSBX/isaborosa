@@ -3,6 +3,8 @@ package com.isaborosa.biblioteca.config;
 import com.isaborosa.biblioteca.dto.ApiErrorResponse;
 import com.isaborosa.biblioteca.exception.BookNotFoundException;
 import com.isaborosa.biblioteca.exception.DuplicateBookInLibraryException;
+import com.isaborosa.biblioteca.exception.InvalidCredentialsException;
+import com.isaborosa.biblioteca.exception.InvalidCurrentPageException;
 import com.isaborosa.biblioteca.exception.RatingRequiredException;
 import com.isaborosa.biblioteca.exception.UserBookNotFoundException;
 import java.util.LinkedHashMap;
@@ -55,10 +57,22 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse("DUPLICATE_BOOK_IN_LIBRARY", ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiErrorResponse("INVALID_CREDENTIALS", ex.getMessage()));
+    }
+
     @ExceptionHandler(RatingRequiredException.class)
     public ResponseEntity<ApiErrorResponse> handleRatingRequired(RatingRequiredException ex) {
         return ResponseEntity.badRequest()
                 .body(new ApiErrorResponse("RATING_REQUIRED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidCurrentPageException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCurrentPage(InvalidCurrentPageException ex) {
+        return ResponseEntity.badRequest()
+                .body(new ApiErrorResponse("INVALID_CURRENT_PAGE", ex.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

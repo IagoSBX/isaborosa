@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@WithMockUser(username = "Isaborosa")
 class LibraryControllerIntegrationTest {
 
     @Autowired
@@ -51,8 +53,9 @@ class LibraryControllerIntegrationTest {
         userBookRepository.deleteAll();
         bookRepository.deleteAll();
         userRepository.deleteAll();
+        userRepository.flush();
 
-        userRepository.save(new User("Isaborosa"));
+        userRepository.save(new User("Isaborosa", "Isaborosa", "{bcrypt}unused-in-this-test", false));
         book = bookRepository.save(new Book("O Hobbit", "J.R.R. Tolkien", null, null, 1937, null, null, null, null, null));
     }
 
@@ -73,7 +76,7 @@ class LibraryControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
 
-        UpdateLibraryRequest updateRequest = new UpdateLibraryRequest(com.isaborosa.biblioteca.domain.userbook.ReadingStatus.LIDO, 5, null);
+        UpdateLibraryRequest updateRequest = new UpdateLibraryRequest(com.isaborosa.biblioteca.domain.userbook.ReadingStatus.LIDO, 5, null, null);
         mockMvc.perform(patch("/api/library/{id}", userBookId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
@@ -107,7 +110,7 @@ class LibraryControllerIntegrationTest {
 
     @Test
     void deveRetornar404AoAtualizarItemInexistente() throws Exception {
-        UpdateLibraryRequest updateRequest = new UpdateLibraryRequest(com.isaborosa.biblioteca.domain.userbook.ReadingStatus.LIDO, null, null);
+        UpdateLibraryRequest updateRequest = new UpdateLibraryRequest(com.isaborosa.biblioteca.domain.userbook.ReadingStatus.LIDO, null, null, null);
 
         mockMvc.perform(patch("/api/library/{id}", 9999)
                         .contentType(MediaType.APPLICATION_JSON)

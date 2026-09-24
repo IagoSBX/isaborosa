@@ -129,7 +129,7 @@ function BibliotecaEntryLink() {
       to="/biblioteca"
       className="fixed right-4 top-4 z-40 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground shadow-sm transition-colors hover:bg-accent"
     >
-      <Library size={13} /> Biblioteca
+      <Library size={13} /> Estante da mais gata
     </Link>
   );
 }

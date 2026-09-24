@@ -2,9 +2,11 @@ package com.isaborosa.biblioteca.integration.openlibrary;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.isaborosa.biblioteca.dto.BookSearchResultDto;
+import com.isaborosa.biblioteca.dto.FreeSourceDto;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,16 @@ public class OpenLibraryClient {
 
     private static final String DEFAULT_SEARCH_FIELDS =
             "title,author_name,isbn,cover_i,first_publish_year,publisher,number_of_pages_median,subject,key";
+
+    private static final String AVAILABILITY_FIELDS = "ia,ebook_access";
+
+    /**
+     * Identificadores de "ia" que nao levam a uma leitura de fato: "bwb_*" sao
+     * apenas registros de disponibilidade fisica (Better World Books), e
+     * "_librivox" e audiolivro, nao texto. Filtramos os dois para nunca
+     * oferecer um link que nao abre o livro para leitura gratuita de verdade.
+     */
+    private static final String[] UNUSABLE_IA_PATTERNS = {"bwb_", "librivox"};
 
     private final RestClient restClient;
     private final String coversBaseUrl;
@@ -183,5 +195,63 @@ public class OpenLibraryClient {
         String withoutMetadataSection = rawText.split("\r?\n-{3,}")[0];
         String withoutMarkdownLinks = withoutMetadataSection.replaceAll("\\[([^]]+)]\\([^)]+\\)", "$1");
         return withoutMarkdownLinks.trim();
+    }
+
+    /**
+     * Verifica se o livro tem uma copia de leitura publica e gratuita no
+     * Internet Archive. So retorna algo quando "ebook_access" e exatamente
+     * "public" (acesso imediato, sem "emprestimo") e existe pelo menos um
+     * identificador de "ia" utilizavel de fato (ver UNUSABLE_IA_PATTERNS).
+     * Nunca inventa um link: ausencia de dado real vira Optional.empty().
+     */
+    public Optional<FreeSourceDto> fetchInternetArchiveSource(String isbn, String title, String author) {
+        String query = StringUtils.hasText(isbn)
+                ? "isbn:" + isbn
+                : buildTitleAuthorQuery(title, author);
+        if (!StringUtils.hasText(query)) {
+            return Optional.empty();
+        }
+        try {
+            OpenLibrarySearchResponse response = restClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/search.json")
+                            .queryParam("q", query)
+                            .queryParam("limit", 1)
+                            .queryParam("fields", AVAILABILITY_FIELDS)
+                            .build())
+                    .retrieve()
+                    .body(OpenLibrarySearchResponse.class);
+            if (response == null || response.docs() == null || response.docs().isEmpty()) {
+                return Optional.empty();
+            }
+            OpenLibrarySearchResponse.Doc doc = response.docs().get(0);
+            if (!"public".equals(doc.ebook_access()) || doc.ia() == null) {
+                return Optional.empty();
+            }
+            return doc.ia().stream()
+                    .filter(this::isUsableIaId)
+                    .findFirst()
+                    .map(iaId -> new FreeSourceDto(
+                            "INTERNET_ARCHIVE", "Internet Archive", "https://archive.org/details/" + iaId));
+        } catch (Exception ex) {
+            log.warn("Falha ao consultar disponibilidade gratuita no Internet Archive: {}", ex.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private boolean isUsableIaId(String iaId) {
+        String lower = iaId.toLowerCase();
+        for (String pattern : UNUSABLE_IA_PATTERNS) {
+            if (lower.contains(pattern)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String buildTitleAuthorQuery(String title, String author) {
+        if (!StringUtils.hasText(title)) {
+            return null;
+        }
+        return StringUtils.hasText(author) ? title + " " + author : title;
     }
 }

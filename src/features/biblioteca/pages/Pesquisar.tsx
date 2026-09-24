@@ -2,6 +2,7 @@ import { Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { BuscaBarra } from "../components/BuscaBarra";
+import { GenreCard } from "../components/GenreCard";
 import { InfiniteScrollSentinel } from "../components/InfiniteScrollSentinel";
 import { LivroCard } from "../components/LivroCard";
 import { ResultadosGrid, ResultadosGridSkeleton } from "../components/ResultadosGrid";
@@ -12,7 +13,6 @@ import { useOpenBook } from "../hooks/useOpenBook";
 import { usePopularBooks } from "../hooks/usePopularBooks";
 import { useRecommendations } from "../hooks/useRecommendations";
 import { useRelatedBooks } from "../hooks/useRelatedBooks";
-import { cn } from "@/lib/utils";
 
 const DEFAULT_EXPLORE_GENRE = "Ficção";
 
@@ -81,21 +81,14 @@ export function Pesquisar() {
         </div>
 
         {mode !== "search" && (
-          <div className="mt-4 flex flex-wrap gap-1.5">
+          <div className="mt-4 flex gap-2.5 overflow-x-auto pb-1">
             {GENRE_CATEGORIES.map((genre) => (
-              <button
+              <GenreCard
                 key={genre}
-                type="button"
+                genre={genre}
+                active={activeCategory === genre}
                 onClick={() => setActiveCategory((current) => (current === genre ? null : genre))}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-all",
-                  activeCategory === genre
-                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                    : "border-border bg-background text-muted-foreground hover:border-muted-foreground/30 hover:text-foreground",
-                )}
-              >
-                {genre}
-              </button>
+              />
             ))}
           </div>
         )}
@@ -186,7 +179,8 @@ export function Pesquisar() {
       )}
 
       <section>
-        <h2 className="mb-3 font-display text-xl text-foreground">Recomendações para você</h2>
+        <h2 className="font-display text-xl text-foreground">Escolhidos para a Baldinho</h2>
+        <p className="mb-3 text-sm text-muted-foreground">Livros que combinam com as histórias que você já gostou.</p>
         {isLoadingRecommendations ? (
           <ResultadosGridSkeleton />
         ) : recommendations && recommendations.length > 0 ? (

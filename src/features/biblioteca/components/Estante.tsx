@@ -32,7 +32,7 @@ export function Estante({ userBooks, isLoading }: EstanteProps) {
   if (userBooks.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-gradient-to-br from-card to-rose-wash/20 px-6 py-16 text-center">
-        <p className="font-display text-xl text-foreground">Sua estante está vazia, por enquanto.</p>
+        <p className="font-display text-xl text-foreground">Seu cantinho de leitura está vazio, por enquanto.</p>
         <p className="max-w-sm text-sm text-muted-foreground">
           Procure um livro e adicione à sua biblioteca pessoal para começar a organizar sua leitura.
         </p>

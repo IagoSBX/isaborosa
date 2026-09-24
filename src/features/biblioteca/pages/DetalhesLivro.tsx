@@ -8,10 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { AdicionarBibliotecaModal } from "../components/AdicionarBibliotecaModal";
 import { ComprarBotoes } from "../components/ComprarBotoes";
+import { ContadorPaginas } from "../components/ContadorPaginas";
+import { EncontrarGratuitamente } from "../components/EncontrarGratuitamente";
 import { RatingStars } from "../components/RatingStars";
 import { ResultadosGrid, ResultadosGridSkeleton } from "../components/ResultadosGrid";
 import { useBook } from "../hooks/useBook";
 import { useAddToLibrary, useLibrary, useRemoveFromLibrary, useUpdateLibraryEntry } from "../hooks/useLibrary";
+import { useFreeSources } from "../hooks/useFreeSources";
 import { useOpenBook } from "../hooks/useOpenBook";
 import { usePrices } from "../hooks/usePrices";
 import { useRecommendations } from "../hooks/useRecommendations";
@@ -27,6 +30,7 @@ export function DetalhesLivro({ bookId }: DetalhesLivroProps) {
   const { data: book, isLoading, isError } = useBook(bookId);
   const { data: libraryEntries } = useLibrary();
   const { data: prices, isLoading: isLoadingPrices } = usePrices(bookId);
+  const { data: freeSources, isLoading: isLoadingFreeSources } = useFreeSources(bookId);
   const addToLibrary = useAddToLibrary();
   const updateEntry = useUpdateLibraryEntry();
   const removeEntry = useRemoveFromLibrary();
@@ -100,7 +104,7 @@ export function DetalhesLivro({ bookId }: DetalhesLivroProps) {
         to="/biblioteca"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ChevronLeft size={16} /> Minha biblioteca
+        <ChevronLeft size={16} /> Minha Estante
       </Link>
 
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-[15rem_1fr]">
@@ -143,7 +147,18 @@ export function DetalhesLivro({ bookId }: DetalhesLivroProps) {
             </p>
           )}
 
-          <ComprarBotoes prices={prices ?? []} isLoading={isLoadingPrices} title={book.title} author={book.author} />
+          {(isLoadingPrices ||
+            isLoadingFreeSources ||
+            (prices && prices.length > 0) ||
+            (freeSources && freeSources.length > 0)) && (
+            <div className="space-y-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Onde encontrar</h2>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <EncontrarGratuitamente sources={freeSources ?? []} isLoading={isLoadingFreeSources} />
+                <ComprarBotoes prices={prices ?? []} isLoading={isLoadingPrices} />
+              </div>
+            </div>
+          )}
 
           <div className="rounded-2xl border border-border bg-gradient-to-br from-card to-rose-wash/10 p-5 shadow-sm">
             {existingEntry ? (
@@ -167,6 +182,17 @@ export function DetalhesLivro({ bookId }: DetalhesLivroProps) {
                     />
                   )}
                 </div>
+
+                {existingEntry.status === "LENDO" && (
+                  <ContadorPaginas
+                    currentPage={existingEntry.currentPage}
+                    pageCount={book.pageCount}
+                    isPending={updateEntry.isPending}
+                    onCommit={(currentPage) =>
+                      updateEntry.mutate({ userBookId: existingEntry.id, input: { currentPage } })
+                    }
+                  />
+                )}
 
                 <div className="flex flex-wrap gap-2">
                   <AdicionarBibliotecaModal

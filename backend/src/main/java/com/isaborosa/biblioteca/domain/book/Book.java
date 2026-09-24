@@ -69,6 +69,10 @@ public class Book {
         this.openLibraryKey = openLibraryKey;
     }
 
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
     public void updateFrom(Book other) {
         this.title = other.title;
         this.author = other.author;

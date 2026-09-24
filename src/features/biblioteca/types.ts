@@ -32,6 +32,7 @@ export interface UserBook {
   status: ReadingStatus;
   rating: number | null;
   favorite: boolean;
+  currentPage: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -60,6 +61,7 @@ export interface UpdateLibraryInput {
   status?: ReadingStatus;
   rating?: number | null;
   favorite?: boolean;
+  currentPage?: number | null;
 }
 
 export interface Recommendation {
@@ -72,6 +74,12 @@ export interface PriceQuote {
   price: number;
   url: string;
   checkedAt: string;
+}
+
+export interface FreeSource {
+  store: string;
+  label: string;
+  url: string;
 }
 
 export interface GenreCount {

@@ -8,6 +8,7 @@ import com.isaborosa.biblioteca.dto.CreateBookRequest;
 import com.isaborosa.biblioteca.exception.BookNotFoundException;
 import com.isaborosa.biblioteca.integration.googlebooks.GoogleBooksClient;
 import com.isaborosa.biblioteca.integration.openlibrary.OpenLibraryClient;
+import com.isaborosa.biblioteca.integration.translation.TranslationClient;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,15 +23,26 @@ public class BookService {
 
     private static final int RESULTS_PER_PAGE = 20;
 
+    private static final String FICHA_TECNICA_MARKER = "\n\nFicha técnica:";
+
+    /**
+     * Palavras que praticamente nunca aparecem em texto em ingles com esses
+     * espacos ao redor - usadas para nao re-traduzir (e arriscar degradar)
+     * uma sinopse que ja esta em portugues.
+     */
+    private static final String[] PORTUGUESE_MARKERS = {" que ", " não ", " para ", " são ", " está ", " uma "};
+
     private final BookRepository bookRepository;
     private final OpenLibraryClient openLibraryClient;
     private final GoogleBooksClient googleBooksClient;
+    private final TranslationClient translationClient;
 
     public BookService(BookRepository bookRepository, OpenLibraryClient openLibraryClient,
-            GoogleBooksClient googleBooksClient) {
+            GoogleBooksClient googleBooksClient, TranslationClient translationClient) {
         this.bookRepository = bookRepository;
         this.openLibraryClient = openLibraryClient;
         this.googleBooksClient = googleBooksClient;
+        this.translationClient = translationClient;
     }
 
     /**
@@ -130,7 +142,9 @@ public class BookService {
         boolean isRealOpenLibraryKey = StringUtils.hasText(request.openLibraryKey())
                 && request.openLibraryKey().startsWith("/works/");
         String synopsis = isRealOpenLibraryKey
-                ? openLibraryClient.fetchWorkDescription(request.openLibraryKey()).orElse(null)
+                ? openLibraryClient.fetchWorkDescription(request.openLibraryKey())
+                        .map(this::translateSynopsis)
+                        .orElse(null)
                 : null;
 
         String fichaTecnica = buildFichaTecnica(request);
@@ -139,6 +153,58 @@ public class BookService {
             return synopsis + "\n\n" + fichaTecnica;
         }
         return StringUtils.hasText(synopsis) ? synopsis : fichaTecnica;
+    }
+
+    /**
+     * A sinopse da Open Library vem em ingles; o produto exige que toda
+     * sinopse exibida esteja em portugues. Se a traducao falhar (API fora do
+     * ar, cota esgotada), mantemos o texto original em ingles em vez de
+     * esconder a sinopse - preferimos mostrar algo real a nada.
+     */
+    private String translateSynopsis(String englishText) {
+        return translationClient.translateToPortuguese(englishText).orElse(englishText);
+    }
+
+    /**
+     * Traduz sinopses salvas antes da traducao automatica existir (livros
+     * adicionados a biblioteca antes desta funcionalidade). Roda no startup
+     * (ver DescriptionBackfillRunner) e e idempotente: sinopses que ja
+     * parecem estar em portugues sao puladas, entao em execucoes seguintes
+     * so os livros realmente pendentes custam uma chamada externa.
+     */
+    @Transactional
+    public int retranslatePendingDescriptions() {
+        List<Book> candidates = bookRepository.findByOpenLibraryKeyStartingWithAndDescriptionIsNotNull("/works/");
+        int updated = 0;
+        for (Book book : candidates) {
+            String description = book.getDescription();
+            int markerIndex = description.indexOf(FICHA_TECNICA_MARKER);
+            String synopsis = markerIndex >= 0 ? description.substring(0, markerIndex) : description;
+            String fichaTecnica = markerIndex >= 0 ? description.substring(markerIndex + 2) : null;
+
+            if (looksLikePortuguese(synopsis)) {
+                continue;
+            }
+
+            String translatedSynopsis = translateSynopsis(synopsis);
+            String newDescription =
+                    fichaTecnica != null ? translatedSynopsis + "\n\n" + fichaTecnica : translatedSynopsis;
+            if (!newDescription.equals(description)) {
+                book.updateDescription(newDescription);
+                updated++;
+            }
+        }
+        return updated;
+    }
+
+    private boolean looksLikePortuguese(String text) {
+        String padded = " " + text.toLowerCase() + " ";
+        for (String marker : PORTUGUESE_MARKERS) {
+            if (padded.contains(marker)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String buildFichaTecnica(CreateBookRequest request) {

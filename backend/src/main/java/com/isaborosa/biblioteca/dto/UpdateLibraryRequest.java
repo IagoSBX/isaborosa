@@ -7,5 +7,6 @@ import jakarta.validation.constraints.Min;
 public record UpdateLibraryRequest(
         ReadingStatus status,
         @Min(1) @Max(5) Integer rating,
-        Boolean favorite) {
+        Boolean favorite,
+        @Min(0) Integer currentPage) {
 }

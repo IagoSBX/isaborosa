@@ -4,6 +4,7 @@ import type {
   Book,
   BookSearchResult,
   CreateBookInput,
+  FreeSource,
   PriceQuote,
   ReadingStatus,
   Recommendation,
@@ -38,6 +39,8 @@ export const libraryApi = {
   getRecommendations: () => api.get<Recommendation[]>("/api/recommendations"),
 
   getPrices: (bookId: number) => api.get<PriceQuote[]>(`/api/books/${bookId}/prices`),
+
+  getFreeSources: (bookId: number) => api.get<FreeSource[]>(`/api/books/${bookId}/free-sources`),
 
   getStats: () => api.get<Stats>("/api/library/stats"),
 };
